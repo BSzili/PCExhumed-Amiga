@@ -846,7 +846,7 @@ int CONFIG_ReadSetup()
     SCRIPT_GetNumber(scripthandle, "Misc", "RunMode",&auto_run);
     SCRIPT_GetNumber( scripthandle, "Misc", "Crosshairs",&gShowCrosshair);
 
-    //SCRIPT_GetNumber(scripthandle, "Sound Setup", "FXDevice",&FXDevice); // TODO
+    SCRIPT_GetNumber(scripthandle, "Sound Setup", "FXDevice",&FXDevice);
     //SCRIPT_GetNumber(scripthandle, "Sound Setup", "MusicDevice",&MusicDevice);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "FXVolume",&FXVolume);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "MusicVolume",&MusicVolume);
@@ -856,7 +856,7 @@ int CONFIG_ReadSetup()
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "NumChannels",&NumChannels);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "NumBits",&NumBits);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "MixRate",&MixRate);
-    //SCRIPT_GetNumber(scripthandle, "Sound Setup", "ReverseStereo",&ReverseStereo); // TODO
+    SCRIPT_GetNumber(scripthandle, "Sound Setup", "ReverseStereo",&ReverseStereo);
 
     SCRIPT_GetNumber(scripthandle, "Controls", "UseJoystick", &gSetup.usejoystick);
     SCRIPT_GetNumber(scripthandle, "Controls", "UseMouse", &gSetup.usemouse);
@@ -1011,6 +1011,7 @@ void CONFIG_SetupJoystick(void)
             JoystickFunctions[i][1] = CONFIG_FunctionNameToNum(temp);
     }
 
+#ifndef __AMIGA__
     // map over the axes
     for (i=0; i<MAXJOYAXES; i++)
     {
@@ -1065,6 +1066,7 @@ void CONFIG_SetupJoystick(void)
         CONTROL_SetAnalogAxisInvert(i, JoystickAnalogueInvert[i], controldevice_joystick);
 #endif
     }
+#endif
 }
 
 void SetupInput()
@@ -1279,6 +1281,7 @@ void CONFIG_WriteSetup(uint32_t flags)
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_FunctionNumToName(JoystickFunctions[dummy][1]));
             }
         }
+#ifndef __AMIGA__
         for (int dummy=0; dummy<MAXJOYAXES; dummy++)
         {
             if (CONFIG_AnalogNumToName(JoystickAnalogueAxes[dummy]))
@@ -1311,6 +1314,7 @@ void CONFIG_WriteSetup(uint32_t flags)
             Bsprintf(buf, "ControllerAnalogSaturate%d", dummy);
             SCRIPT_PutNumber(scripthandle, "Controls", buf, JoystickAnalogueSaturate[dummy], FALSE, FALSE);
         }
+#endif
     }
 
     //SCRIPT_PutString(ud.config.scripthandle, "Comm Setup","PlayerName",&szPlayerName[0]);
@@ -1334,7 +1338,7 @@ void CONFIG_WriteSetup(uint32_t flags)
     SCRIPT_PutNumber(scripthandle, "Misc", "RunMode",auto_run,false,false);
     SCRIPT_PutNumber( scripthandle, "Misc", "Crosshairs",gShowCrosshair,false,false);
 
-    //SCRIPT_PutNumber( scripthandle, "Sound Setup", "FXDevice", FXDevice, false, false); // TODO
+    SCRIPT_PutNumber( scripthandle, "Sound Setup", "FXDevice", FXDevice, false, false);
     //SCRIPT_PutNumber( scripthandle, "Sound Setup", "MusicDevice", MusicDevice, false, false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "FXVolume",FXVolume,false,false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "MusicVolume",MusicVolume,false,false);
@@ -1344,7 +1348,7 @@ void CONFIG_WriteSetup(uint32_t flags)
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "NumChannels", NumChannels, false, false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "NumBits", NumBits, false, false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "MixRate", MixRate, false, false);
-    //SCRIPT_PutNumber( scripthandle, "Sound Setup", "ReverseStereo",ReverseStereo,false,false); // TODO
+    SCRIPT_PutNumber( scripthandle, "Sound Setup", "ReverseStereo",ReverseStereo,false,false);
 
     SCRIPT_PutNumber( scripthandle, "Controls","UseJoystick",gSetup.usejoystick,false,false);
     SCRIPT_PutNumber( scripthandle, "Controls","UseMouse",gSetup.usemouse,false,false);

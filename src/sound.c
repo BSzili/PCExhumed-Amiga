@@ -358,7 +358,11 @@ void InitFX(void)
     } else {
         fxdevicetype = FXDevice - 1;
     }
-    if (FX_Init(fxdevicetype, NumVoices, &NumChannels, &NumBits, &MixRate, initdata) != FX_Ok)
+    if (FX_Init(fxdevicetype, NumVoices, &NumChannels, &NumBits, &MixRate, initdata) == FX_Ok) {
+        buildprintf("FX driver is %s\n", FX_GetCurrentDriverName());
+        buildprintf("Format is %dHz %d-bit %d-channel\n", MixRate, NumBits, NumChannels);
+        FX_SetReverseStereo(ReverseStereo);
+    } else
 #else
     if (FX_Init(NumVoices, NumChannels, MixRate, initdata) != FX_Ok)
 #endif
