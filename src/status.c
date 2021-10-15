@@ -476,6 +476,9 @@ void SetPlayerItem(short nPlayer, short nItem)
         SetItemSeq();
         if (nItem >= 0) {
             BuildStatusAnim(156 + (2 * PlayerList[nLocalPlayer].items[nItem]), 0);
+#ifdef __AMIGA__
+			statusMagicRedraw = 1;
+#endif
         }
     }
 }
