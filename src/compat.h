@@ -287,4 +287,6 @@ extern const char *s_buildRev;
 //#define rotatesprite_(sx, sy, z, a, picnum, dashade, dapalnum, dastat, daalpha, dablend, cx1, cy1, cx2, cy2) rotatesprite((sx), (sy), (z), (a), (picnum), (dashade), (dapalnum), (dastat)&0xFF, (cx1), (cy1), (cx2), (cy2))
 #define rotatesprite_win(sx, sy, z, a, picnum, dashade, dapalnum, dastat) rotatesprite((sx), (sy), (z), (a), (picnum), (dashade), (dapalnum), (dastat), windowx1, windowy1, windowx2, windowy2)
 
+#define wrand rand
+
 #endif
