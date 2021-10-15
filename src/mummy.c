@@ -196,9 +196,6 @@ void FuncMummy(int a, int nDamage, int nRun)
             sprite[nSprite].picnum = seq_GetSeqPicnum2(nSeq, MummyList[nMummy].B);
 
             short nFrame = SeqBase[nSeq] + MummyList[nMummy].B;
-#ifdef __AMIGA__
-            volatile // compiler bug workaround
-#endif
             short nFrameFlag = FrameFlag[nFrame];
 
             seq_MoveSequence(nSprite, nSeq, MummyList[nMummy].B);
