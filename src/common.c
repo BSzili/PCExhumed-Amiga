@@ -273,7 +273,9 @@ void G_LoadGroups(int32_t autoload)
         G_LoadGroupsInDir(g_modDir);
 #endif
 
+#ifndef __AMIGA__
     loaddefinitions_game(G_DefFile(), TRUE);
+#endif
 
     struct strllist* s;
 

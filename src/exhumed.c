@@ -467,6 +467,7 @@ int32_t g_noAutoLoad = 0;
 
 //////////
 
+#ifndef __AMIGA__
 enum gametokens
 {
     T_INCLUDE = 0,
@@ -637,6 +638,7 @@ int loaddefinitions_game(const char *fileName, int32_t firstPass)
 
     return 0;
 }
+#endif
 
 ////////
 
@@ -2371,6 +2373,7 @@ int app_main(int argc, char const* const* argv)
 	videoNextPage();
 #endif
 
+#ifndef __AMIGA__
     const char *defsfile = G_DefFile();
     uint32_t stime = timerGetTicks();
     if (!loaddefinitionsfile(defsfile))
@@ -2379,6 +2382,7 @@ int app_main(int argc, char const* const* argv)
         initprintf("Definitions file \"%s\" loaded in %d ms.\n", defsfile, etime-stime);
     }
     loaddefinitions_game(defsfile, FALSE);
+#endif
 
 
     if (enginePostInit())
