@@ -1170,7 +1170,11 @@ void CONFIG_WriteSettings(void) // save binds and aliases to <cfgname>_settings.
 
 void CONFIG_WriteSetup(uint32_t flags)
 {
+#ifdef __AMIGA__
+    char buf[128];
+#else
     char buf[256];
+#endif
     if (!setupread) return;
 
     if (scripthandle < 0)

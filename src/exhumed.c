@@ -1881,7 +1881,9 @@ static int32_t nonsharedtimer;
 
 int app_main(int argc, char const* const* argv)
 {
+#ifndef __AMIGA__
     char buffer[BMAX_PATH];
+#endif
 #ifdef _WIN32
 #ifndef DEBUGGINGAIDS
     if (!G_CheckCmdSwitch(argc, argv, "-noinstancechecking") && !windowsCheckAlreadyRunning())
@@ -1976,6 +1978,9 @@ int app_main(int argc, char const* const* argv)
             {
                 if (!bPlayback)
                 {
+#ifdef __AMIGA__
+                    char buffer[BMAX_PATH];
+#endif
                     G_ModDirSnprintfLite(buffer, sizeof(buffer), "DATA.VCR");
                     vcrfpwrite = fopen(buffer, "wb+");
                     if (vcrfpwrite != NULL) {
@@ -3334,7 +3339,11 @@ int Query(short nLines, short nKeys, ...)
 {
     short i;
 
+#ifdef __AMIGA__
+    char strings[2][80];
+#else
     char strings[20][80];
+#endif
     char keys[20];
 
     va_list args;

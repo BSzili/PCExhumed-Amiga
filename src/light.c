@@ -87,7 +87,16 @@ void MyLoadPalette()
 
 int LoadPaletteLookups()
 {
+#ifdef __AMIGA__
+    uint8_t *buffer = malloc(256*64);
+    if (!buffer)
+    {
+        initprintf("Can't allocate the buffer for the palette lookups\n");
+        return 0;
+    }
+#else
     uint8_t buffer[256*64];
+#endif
     numshades = 64;
 
     for (int i = 0; i < kMaxGrads; i++)
@@ -96,6 +105,9 @@ int LoadPaletteLookups()
         if (hFile == -1)
         {
             initprintf("Error reading palette lookup '%s'\n", GradList[i]);
+#ifdef __AMIGA__
+            free(buffer);
+#endif
             return 0;
         }
 
@@ -145,6 +157,9 @@ int LoadPaletteLookups()
 
     }
 
+#ifdef __AMIGA__
+    free(buffer);
+#endif
     return 1;
 }
 
