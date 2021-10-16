@@ -69,11 +69,7 @@ struct demo_header
     int16_t nRun;
 
     int16_t nLives;
-#ifdef __AMIGA__
-} __attribute__((packed)); // pragma pack is ignored, so let's use attributes
-#else
 };
-#endif
 #ifndef EDUKE32
 typedef struct demo_header demo_header;
 #endif

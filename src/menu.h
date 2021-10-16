@@ -33,6 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 struct GameStat
 {
     uint8_t nMap;
+#ifdef __AMIGA__
+    uint8_t pad; // savegamea.sav compatibility
+#endif
     short nWeapons;
     short nCurrentWeapon;
     short clip;
