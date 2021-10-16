@@ -34,7 +34,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // KEEPINSYNC mact/include/_control.h, build/src/sdlayer.cpp
 #define MAXJOYBUTTONS 32
+#ifndef EDUKE32
+#define MAXJOYBUTTONSANDHATS 32
+#else
 #define MAXJOYBUTTONSANDHATS (MAXJOYBUTTONS+4)
+#endif
 
 // KEEPINSYNC mact/include/_control.h, build/src/sdlayer.cpp
 #define MAXMOUSEAXES 2
@@ -54,7 +58,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // default joystick settings
 #define DEFAULTJOYSTICKANALOGUESCALE        65536
 #define DEFAULTJOYSTICKANALOGUEDEAD         2000
+#ifdef __AMIGA__
+#define DEFAULTJOYSTICKANALOGUESATURATE     (32767-1024)
+#else
 #define DEFAULTJOYSTICKANALOGUESATURATE     9500
+#endif
 
 enum {
 	gamefunc_Move_Forward,

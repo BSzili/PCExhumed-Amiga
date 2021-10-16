@@ -230,7 +230,7 @@ static const char* mousedigitaldefaults[MAXMOUSEDIGITAL] =
 };
 
 #ifdef __AMIGA__
-static char * joystickdefaults[MAXJOYBUTTONS] =
+static char * joystickdefaults[MAXJOYBUTTONSANDHATS] =
    {
    "Fire",        // Red
    "Strafe",      // Blue
@@ -247,26 +247,9 @@ static char * joystickdefaults[MAXJOYBUTTONS] =
    "Move_Backward", // DP down
    "Turn_Left",   // DP left
    "Turn_Right",  // DP right
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
    };
 
-static char * joystickclickeddefaults[MAXJOYBUTTONS] =
+static char * joystickclickeddefaults[MAXJOYBUTTONSANDHATS] =
    {
    "",            // Red
    "Inventory",   // Blue
@@ -283,6 +266,66 @@ static char * joystickclickeddefaults[MAXJOYBUTTONS] =
    "",            // DP down
    "",            // DP left
    "",            // DP right
+   };
+
+static const char * joystickanalogdefaults[MAXJOYAXES] =
+   {
+   };
+
+static const char * joystickdigitaldefaults[MAXJOYDIGITAL] =
+   {
+   };
+
+static const char * joystickdefaults_modern[MAXJOYBUTTONSANDHATS] =
+   {
+   "Jump",        // A
+   "Crouch",      // B
+   "Open",        // X
+   "Inventory_Use", // Y
+   "Map_Toggle",  // Back
+   "",            // Guide
+   "Show_Menu",   // Start TODO
+   "",            // L thumb
+   "",            // R thumb
+   "Jump",        // L shoulder
+   "Weapon_Fire", // R shoulder
+   "Previous_Weapon", // DP up
+   "Next_Weapon",     // DP down
+   "Inventory_Left", // DP left
+   "Inventory_Right", // DP right
+   };
+
+static const char * joystickclickeddefaults_modern[MAXJOYBUTTONSANDHATS] =
+   {
+   "",            // A
+   "",            // B
+   "",            // X
+   "",            // Y
+   "",            // Back
+   "",            // Guide
+   "",            // Start
+   "",            // L thumb
+   "",            // R thumb
+   "",            // L shoulder
+   "",            // R shoulder
+   "",            // DP up
+   "",            // DP down
+   "",            // DP left
+   "",            // DP right
+   };
+
+static const char * joystickanalogdefaults_modern[MAXJOYAXES] =
+   {
+   "analog_strafing",
+   "analog_moving",
+   "analog_turning",
+   "analog_lookingupanddown",
+   "",
+   "",
+   };
+
+static const char * joystickdigitaldefaults_modern[MAXJOYAXES*2] =
+   {
    "",
    "",
    "",
@@ -292,12 +335,7 @@ static char * joystickclickeddefaults[MAXJOYBUTTONS] =
    "",
    "",
    "",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "",
+   "Crouch",
    "",
    "",
    };
@@ -693,12 +731,39 @@ void CONFIG_SetDefaults()
     }
 
 #ifdef __AMIGA__
-    for (int i=0; i<MAXJOYBUTTONS; i++)
+    const char **joydefaultset, **joyclickeddefaultset;
+    const char **joydigitaldefaultset, **joyanalogdefaultset;
+    int style = (joynumaxes > 0); // TODO move autodetect to a separate function
+
+    if (style) {
+        joydefaultset = joystickdefaults_modern;
+        joyclickeddefaultset = joystickclickeddefaults_modern;
+        joydigitaldefaultset = joystickdigitaldefaults_modern;
+        joyanalogdefaultset = joystickanalogdefaults_modern;
+    } else {
+        joydefaultset = joystickdefaults;
+        joyclickeddefaultset = joystickclickeddefaults;
+        joydigitaldefaultset = joystickdigitaldefaults;
+        joyanalogdefaultset = joystickanalogdefaults;
+    }
+
+    for (int i=0; i<MAXJOYBUTTONSANDHATS; i++)
     {
-        JoystickFunctions[i][0] = CONFIG_FunctionNameToNum(joystickdefaults[i]);
-        JoystickFunctions[i][1] = CONFIG_FunctionNameToNum(joystickclickeddefaults[i]);
+        JoystickFunctions[i][0] = CONFIG_FunctionNameToNum(joydefaultset[i]);
+        JoystickFunctions[i][1] = CONFIG_FunctionNameToNum(joyclickeddefaultset[i]);
         CONTROL_MapButton(JoystickFunctions[i][0], i, 0, controldevice_joystick);
         CONTROL_MapButton(JoystickFunctions[i][1], i, 1, controldevice_joystick);
+    }
+
+    for (int i=0; i<MAXJOYAXES; i++)
+    {
+        JoystickDigitalFunctions[i][0] = CONFIG_FunctionNameToNum(joydigitaldefaultset[i*2]);
+        JoystickDigitalFunctions[i][1] = CONFIG_FunctionNameToNum(joydigitaldefaultset[i*2+1]);
+        CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][0], 0, controldevice_joystick);
+        CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][1], 1, controldevice_joystick);
+
+        JoystickAnalogueAxes[i] = CONFIG_AnalogNameToNum(joyanalogdefaultset[i]);
+        CONTROL_MapAnalogAxis(i, JoystickAnalogueAxes[i], controldevice_joystick);
     }
 #endif
 
@@ -1011,7 +1076,6 @@ void CONFIG_SetupJoystick(void)
             JoystickFunctions[i][1] = CONFIG_FunctionNameToNum(temp);
     }
 
-#ifndef __AMIGA__
     // map over the axes
     for (i=0; i<MAXJOYAXES; i++)
     {
@@ -1066,7 +1130,6 @@ void CONFIG_SetupJoystick(void)
         CONTROL_SetAnalogAxisInvert(i, JoystickAnalogueInvert[i], controldevice_joystick);
 #endif
     }
-#endif
 }
 
 void SetupInput()
@@ -1273,34 +1336,43 @@ void CONFIG_WriteSetup(uint32_t flags)
     {
         for (int dummy=0; dummy<MAXJOYBUTTONSANDHATS; dummy++)
         {
+#ifdef EDUKE32
             if (CONFIG_FunctionNumToName(JoystickFunctions[dummy][0]))
+#endif
             {
                 Bsprintf(buf, "ControllerButton%d", dummy);
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_FunctionNumToName(JoystickFunctions[dummy][0]));
             }
 
+#ifdef EDUKE32
             if (CONFIG_FunctionNumToName(JoystickFunctions[dummy][1]))
+#endif
             {
                 Bsprintf(buf, "ControllerButtonClicked%d", dummy);
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_FunctionNumToName(JoystickFunctions[dummy][1]));
             }
         }
-#ifndef __AMIGA__
         for (int dummy=0; dummy<MAXJOYAXES; dummy++)
         {
+#ifdef EDUKE32
             if (CONFIG_AnalogNumToName(JoystickAnalogueAxes[dummy]))
+#endif
             {
                 Bsprintf(buf, "ControllerAnalogAxes%d", dummy);
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_AnalogNumToName(JoystickAnalogueAxes[dummy]));
             }
 
+#ifdef EDUKE32
             if (CONFIG_FunctionNumToName(JoystickDigitalFunctions[dummy][0]))
+#endif
             {
                 Bsprintf(buf, "ControllerDigitalAxes%d_0", dummy);
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_FunctionNumToName(JoystickDigitalFunctions[dummy][0]));
             }
 
+#ifdef EDUKE32
             if (CONFIG_FunctionNumToName(JoystickDigitalFunctions[dummy][1]))
+#endif
             {
                 Bsprintf(buf, "ControllerDigitalAxes%d_1", dummy);
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_FunctionNumToName(JoystickDigitalFunctions[dummy][1]));
@@ -1318,7 +1390,6 @@ void CONFIG_WriteSetup(uint32_t flags)
             Bsprintf(buf, "ControllerAnalogSaturate%d", dummy);
             SCRIPT_PutNumber(scripthandle, "Controls", buf, JoystickAnalogueSaturate[dummy], FALSE, FALSE);
         }
-#endif
     }
 
     //SCRIPT_PutString(ud.config.scripthandle, "Comm Setup","PlayerName",&szPlayerName[0]);
