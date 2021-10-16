@@ -75,11 +75,17 @@ bool playCDtrack(int nTrack, bool bLoop)
 #endif
         Bsnprintf(filename, sizeof(filename), fmt, nTrack);
 #ifndef EDUKE32
-        Bstrcat(filename, ".wav");
+        Bstrcat(filename, ".mp3");
 #endif
         hFile = S_OpenAudio(filename, 0, 1);
         if (hFile >= 0)
             break;
+#ifndef EDUKE32
+        Bstrcpy(strrchr(filename, '.'), ".wav");
+        hFile = S_OpenAudio(filename, 0, 1);
+        if (hFile >= 0)
+            break;
+#endif
     }
   
     if (hFile < 0) {
