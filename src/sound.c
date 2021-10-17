@@ -478,12 +478,41 @@ int LoadSong(const char *song)
     AIL_set_sequence_volume(S, gMusicVolume>>1, 0);
 }
 #else
+#ifndef EDUKE32
+bool CDInitialized = false;
+#endif
 void InitMusic()
 {
+#ifndef EDUKE32
+    int devicetype, status;
+
+    if (MusicDevice < 0) {
+        return;
+    } else if (MusicDevice == 0) {
+        devicetype = ASS_AutoDetect;
+    } else {
+        devicetype = MusicDevice - 1;
+    }
+
+    status = CD_Init(devicetype);
+
+    if (status != CD_Ok) {
+        buildprintf("CD error: %s\n", CD_ErrorString(status));
+    } else {
+        buildprintf("CD driver is %s\n", CD_GetCurrentDriverName());
+        //CD_SetVolume(MusicVolume);
+        CDInitialized = (CD_GetCurrentDriver() != ASS_NoSound);
+    }
+#endif
 }
 
 void UnInitMusic()
 {
+#ifndef EDUKE32
+    if (CDInitialized) {
+        CD_Shutdown();
+    }
+#endif
 }
 
 void FadeSong()

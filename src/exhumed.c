@@ -799,6 +799,10 @@ void ShutDown(void)
     RemoveEngine();
     UnInitNet();
     UnInitFX();
+#ifndef EDUKE32
+    void UnInitMusic();
+    UnInitMusic();
+#endif
 
     exit(EXIT_SUCCESS);
 }
@@ -2400,7 +2404,8 @@ int app_main(int argc, char const* const* argv)
         ShutDown();
 
 #ifndef EDUKE32
-	signal(SIGABRT, app_crashhandler);
+    signal(SIGABRT, app_crashhandler);
+    signal(SIGINT, app_crashhandler);
 #endif
 
 #ifdef EDUKE32
@@ -2413,6 +2418,10 @@ int app_main(int argc, char const* const* argv)
     KB_Startup();
     InitView();
     InitFX();
+#ifndef EDUKE32
+    void InitMusic();
+    InitMusic();
+#endif
     LoadFX();
     setCDaudiovolume(MusicVolume);
     seq_LoadSequences();

@@ -24,6 +24,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef __cd_h__
 #define __cd_h__
 
+#ifndef EDUKE32
+//#include_next "cd.h"
+// TODO include the original header
+const char * CD_ErrorString(int code);
+int  CD_Init(int SoundCard);
+int  CD_GetCurrentDriver(void);
+const char * CD_GetCurrentDriverName(void);
+void CD_Shutdown(void);
+int  CD_Play(int track, int loop);
+void CD_Stop(void);
+int  CD_IsPlaying(void);
+void CD_SetVolume(int volume);
+#define CD_Ok (0)
+#endif
+
 void setCDaudiovolume(int val);
 bool playCDtrack(int nTrack, bool bLoop);
 void StartfadeCDaudio();

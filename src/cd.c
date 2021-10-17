@@ -35,6 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static char *pTrack = NULL;
 static int trackhandle = -1;
 int nLastVolumeSet = 0;
+#ifndef EDUKE32
+extern bool CDInitialized;
+#endif
 
 /* TODO
 
@@ -47,6 +50,12 @@ void setCDaudiovolume(int val)
     if (trackhandle > 0) {
         FX_SetPan(trackhandle, val, val, val);
     }
+
+#ifndef EDUKE32
+    if (CDInitialized) {
+        CD_SetVolume(val);
+    }
+#endif
 }
 
 bool playCDtrack(int nTrack, bool bLoop)
@@ -61,6 +70,17 @@ bool playCDtrack(int nTrack, bool bLoop)
     }
 
     StopCD();
+
+#ifndef EDUKE32
+    if (CDInitialized) {
+        CD_SetVolume(MusicVolume);
+        int status = CD_Play(nTrack, bLoop);
+        if (status == CD_Ok) {
+            return true;
+        }
+        OSD_Printf("%s\n", CD_ErrorString(status));
+    }
+#endif
 
     char filename[BMAX_PATH];
     int32_t hFile = -1;
@@ -164,6 +184,12 @@ int StepFadeCDaudio()
 
 bool CDplaying()
 {
+#ifndef EDUKE32
+    if (CDInitialized && CD_IsPlaying()) {
+        return true;
+    }
+#endif
+
     if (trackhandle <= 0) {
         return false;
     }
@@ -184,6 +210,12 @@ void StopCD()
         Xaligned_free(pTrack);
         pTrack = NULL;
     }
+
+#ifndef EDUKE32
+    if (CDInitialized) {
+        CD_Stop();
+    }
+#endif
 }
 
 int fadecdaudio()

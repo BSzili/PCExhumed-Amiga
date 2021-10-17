@@ -675,6 +675,7 @@ void CONFIG_SetDefaults()
     NumVoices = 8;
     MusicVolume = 255;
     FXDevice = 0;
+    MusicDevice = 0;
     //bFullScreen = 1; // this is faster?
 #endif
 
@@ -912,7 +913,7 @@ int CONFIG_ReadSetup()
     SCRIPT_GetNumber( scripthandle, "Misc", "Crosshairs",&gShowCrosshair);
 
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "FXDevice",&FXDevice);
-    //SCRIPT_GetNumber(scripthandle, "Sound Setup", "MusicDevice",&MusicDevice);
+    SCRIPT_GetNumber(scripthandle, "Sound Setup", "MusicDevice",&MusicDevice);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "FXVolume",&FXVolume);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "MusicVolume",&MusicVolume);
     SCRIPT_GetNumber(scripthandle, "Sound Setup", "SoundToggle",&SoundToggle);
@@ -1414,7 +1415,7 @@ void CONFIG_WriteSetup(uint32_t flags)
     SCRIPT_PutNumber( scripthandle, "Misc", "Crosshairs",gShowCrosshair,false,false);
 
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "FXDevice", FXDevice, false, false);
-    //SCRIPT_PutNumber( scripthandle, "Sound Setup", "MusicDevice", MusicDevice, false, false);
+    SCRIPT_PutNumber( scripthandle, "Sound Setup", "MusicDevice", MusicDevice, false, false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "FXVolume",FXVolume,false,false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "MusicVolume",MusicVolume,false,false);
     SCRIPT_PutNumber( scripthandle, "Sound Setup", "SoundToggle",SoundToggle,false,false);
