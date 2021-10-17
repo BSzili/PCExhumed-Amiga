@@ -288,10 +288,10 @@ static const char * joystickdefaults_modern[MAXJOYBUTTONSANDHATS] =
    "",            // L thumb
    "",            // R thumb
    "Jump",        // L shoulder
-   "Weapon_Fire", // R shoulder
+   "Fire",        // R shoulder
    "Previous_Weapon", // DP up
    "Next_Weapon",     // DP down
-   "Inventory_Left", // DP left
+   "Inventory_Left",  // DP left
    "Inventory_Right", // DP right
    };
 
