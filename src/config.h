@@ -181,6 +181,7 @@ extern uint8_t KeyboardKeys[kMaxGameFunctions][2];
 extern int32_t MAXCACHE1DSIZE;
 
 #ifndef EDUKE32
+void CONFIG_SetJoystickDefaults(int style);
 void CONFIG_SetDefaultKeys(const char(*keyptr)[kMaxGameFuncLen], bool lazy);
 #else
 void CONFIG_SetDefaultKeys(const char(*keyptr)[kMaxGameFuncLen], bool lazy=false);

@@ -234,6 +234,16 @@ const char *const ConsoleButtons[] =
 };
 
 #ifndef EDUKE32
+static int resetjoystick(const osdfuncparm_t *parm)
+{
+    if (parm->numparms==1)
+    {
+        CONFIG_SetJoystickDefaults(atoi(parm->parms[0]) != 0);
+        return OSDCMD_OK;
+    }
+    return OSDCMD_SHOWHELP;
+}
+
 static int osdcmd_vars(const osdfuncparm_t *parm)
 {
     int showval = (parm->numparms < 1);
@@ -996,6 +1006,7 @@ int32_t registerosdcommands(void)
 #endif
 #ifndef EDUKE32
     OSD_RegisterFunction("showfps","showfps: show the frame rate counter", osdcmd_vars);
+    OSD_RegisterFunction("resetjoystick","resetjoystick <style>: set the joystick default mapping, 0=classic 1=modern", resetjoystick);
 #endif
 
     return 0;

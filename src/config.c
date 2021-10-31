@@ -230,7 +230,7 @@ static const char* mousedigitaldefaults[MAXMOUSEDIGITAL] =
 };
 
 #ifdef __AMIGA__
-static char * joystickdefaults[MAXJOYBUTTONSANDHATS] =
+static const char * joystickdefaults[MAXJOYBUTTONSANDHATS] =
    {
    "Fire",        // Red
    "Strafe",      // Blue
@@ -249,7 +249,7 @@ static char * joystickdefaults[MAXJOYBUTTONSANDHATS] =
    "Turn_Right",  // DP right
    };
 
-static char * joystickclickeddefaults[MAXJOYBUTTONSANDHATS] =
+static const char * joystickclickeddefaults[MAXJOYBUTTONSANDHATS] =
    {
    "",            // Red
    "Inventory",   // Blue
@@ -281,10 +281,10 @@ static const char * joystickdefaults_modern[MAXJOYBUTTONSANDHATS] =
    "Jump",        // A
    "Crouch",      // B
    "Open",        // X
-   "Inventory_Use", // Y
-   "Map_Toggle",  // Back
+   "Inventory",   // Y
+   "Map",         // Back
    "",            // Guide
-   "Show_Menu",   // Start TODO
+   "Escape",      // Start
    "",            // L thumb
    "",            // R thumb
    "Jump",        // L shoulder
@@ -324,7 +324,7 @@ static const char * joystickanalogdefaults_modern[MAXJOYAXES] =
    "",
    };
 
-static const char * joystickdigitaldefaults_modern[MAXJOYAXES*2] =
+static const char * joystickdigitaldefaults_modern[MAXJOYDIGITAL] =
    {
    "",
    "",
@@ -380,7 +380,9 @@ int32_t JoystickFunctions[MAXJOYBUTTONSANDHATS][2];
 int32_t JoystickDigitalFunctions[MAXJOYAXES][2];
 int32_t JoystickAnalogueAxes[MAXJOYAXES];
 int32_t JoystickAnalogueScale[MAXJOYAXES];
+#ifdef EDUKE32
 int32_t JoystickAnalogueInvert[MAXJOYAXES];
+#endif
 int32_t JoystickAnalogueDead[MAXJOYAXES];
 int32_t JoystickAnalogueSaturate[MAXJOYAXES];
 uint8_t KeyboardKeys[kMaxGameFunctions][2];
@@ -517,6 +519,7 @@ static char const * CONFIG_AnalogNumToName(int32_t func)
 }
 
 
+#ifdef EDUKE32
 static void CONFIG_SetJoystickButtonFunction(int i, int j, int function)
 {
     JoystickFunctions[i][j] = function;
@@ -552,6 +555,7 @@ static void CONFIG_SetJoystickAnalogAxisFunction(int i, int function)
     JoystickAnalogueAxes[i] = function;
     CONTROL_MapAnalogAxis(i, function, controldevice_joystick);
 }
+#endif
 
 
 void CONFIG_SetDefaultKeys(const char (*keyptr)[kMaxGameFuncLen], bool lazy/*=false*/)
@@ -731,10 +735,57 @@ void CONFIG_SetDefaults()
         CONTROL_MapAnalogAxis(i, MouseAnalogueAxes[i], controldevice_mouse);
     }
 
+#ifndef EDUKE32
+    for (int i=0; i<MAXJOYBUTTONSANDHATS; i++)
+    {
+        JoystickFunctions[i][0] = CONFIG_FunctionNameToNum(joystickdefaults[i]);
+        JoystickFunctions[i][1] = CONFIG_FunctionNameToNum(joystickclickeddefaults[i]);
+        CONTROL_MapButton(JoystickFunctions[i][0], i, 0, controldevice_joystick);
+        CONTROL_MapButton(JoystickFunctions[i][1], i, 1, controldevice_joystick);
+    }
+
+    for (int i=0; i<MAXJOYAXES; i++)
+    {
 #ifdef __AMIGA__
+        // TODO PSX defaults, remove once the new menus are implemented
+        if (i == 2)
+            JoystickAnalogueScale[i] = 6144; // analog_turning
+        else if (i == 3)
+            JoystickAnalogueScale[i] = 2048; // analog_lookingupanddown
+        else
+#endif
+        JoystickAnalogueScale[i] = DEFAULTJOYSTICKANALOGUESCALE;
+        JoystickAnalogueDead[i] = DEFAULTJOYSTICKANALOGUEDEAD;
+        JoystickAnalogueSaturate[i] = DEFAULTJOYSTICKANALOGUESATURATE;
+        CONTROL_SetAnalogAxisScale(i, JoystickAnalogueScale[i], controldevice_joystick);
+
+        JoystickDigitalFunctions[i][0] = CONFIG_FunctionNameToNum(joystickdigitaldefaults[i*2]);
+        JoystickDigitalFunctions[i][1] = CONFIG_FunctionNameToNum(joystickdigitaldefaults[i*2+1]);
+        CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][0], 0, controldevice_joystick);
+        CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][1], 1, controldevice_joystick);
+
+        JoystickAnalogueAxes[i] = CONFIG_AnalogNameToNum(joystickanalogdefaults[i]);
+        CONTROL_MapAnalogAxis(i, JoystickAnalogueAxes[i], controldevice_joystick);
+    }
+#endif
+
+    // TODO:
+    //CONFIG_SetGameControllerDefaultsStandard();
+
+#if 0
+    FXVolume       = 128;
+    MusicVolume    = 128;
+    ReverseStereo  = 0;
+    ControllerType = controltype_keyboardandmouse;
+    lMouseSens     = 8;
+#endif
+}
+
+#ifndef EDUKE32
+void CONFIG_SetJoystickDefaults(int style)
+{
     const char **joydefaultset, **joyclickeddefaultset;
     const char **joydigitaldefaultset, **joyanalogdefaultset;
-    int style = (joynumaxes > 0); // TODO move autodetect to a separate function
 
     if (style) {
         joydefaultset = joystickdefaults_modern;
@@ -766,21 +817,8 @@ void CONFIG_SetDefaults()
         JoystickAnalogueAxes[i] = CONFIG_AnalogNameToNum(joyanalogdefaultset[i]);
         CONTROL_MapAnalogAxis(i, JoystickAnalogueAxes[i], controldevice_joystick);
     }
-#endif
-
-    // TODO:
-    //CONFIG_SetGameControllerDefaultsStandard();
-
-#if 0
-    FXVolume       = 128;
-    MusicVolume    = 128;
-    ReverseStereo  = 0;
-    ControllerType = controltype_keyboardandmouse;
-    lMouseSens     = 8;
-#endif
 }
 
-#ifndef EDUKE32
 void CONFIG_ReadKeys( void )
    {
    int32 i;
@@ -1100,10 +1138,12 @@ void CONFIG_SetupJoystick(void)
         SCRIPT_GetNumber(scripthandle, "Controls", str,&scale);
         JoystickAnalogueScale[i] = scale;
 
+#ifdef EDUKE32
         Bsprintf(str,"ControllerAnalogInvert%d",i);
         scale = JoystickAnalogueInvert[i];
         SCRIPT_GetNumber(scripthandle, "Controls", str,&scale);
         JoystickAnalogueInvert[i] = scale;
+#endif
 
         Bsprintf(str,"ControllerAnalogDead%d",i);
         scale = JoystickAnalogueDead[i];
@@ -1152,7 +1192,6 @@ void SetupInput()
 #ifndef EDUKE32
     for (int i=0; i<MAXJOYAXES; i++)
 	{
-		// TODO copy this from JFDuke3D
         CONTROL_SetJoyAxisDead(i, JoystickAnalogueDead[i]);
         CONTROL_SetJoyAxisSaturate(i, JoystickAnalogueSaturate[i]);
 	}
@@ -1382,8 +1421,10 @@ void CONFIG_WriteSetup(uint32_t flags)
             Bsprintf(buf, "ControllerAnalogScale%d", dummy);
             SCRIPT_PutNumber(scripthandle, "Controls", buf, JoystickAnalogueScale[dummy], FALSE, FALSE);
 
+#ifdef EDUKE32
             Bsprintf(buf, "ControllerAnalogInvert%d", dummy);
             SCRIPT_PutNumber(scripthandle, "Controls", buf, JoystickAnalogueInvert[dummy], FALSE, FALSE);
+#endif
 
             Bsprintf(buf, "ControllerAnalogDead%d", dummy);
             SCRIPT_PutNumber(scripthandle, "Controls", buf, JoystickAnalogueDead[dummy], FALSE, FALSE);
