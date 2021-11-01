@@ -364,15 +364,21 @@ static void ProcessGroups(BUILDVFS_FIND_REC *srch)
             if (fh < 0) continue;
             if (Bfstat(fh, &st)) continue;
 
-            initprintf(" Checksumming %s...", sidx->name);
 #ifndef EDUKE32
+            int checkedSize = 0;
+            int totalSize = st.st_size;
             crc32init(&crcval);
             do {
                 b = read(fh, buf, ReadSize);
                 if (b > 0) crc32block(&crcval, buf, b);
+                checkedSize += b;
+                const int checkedKB = checkedSize / 1024;
+                const int totalKB = totalSize / 1024;
+                initprintf("\rChecksumming %s (%d/%d KB %d%%)...", sidx->name, checkedKB, totalKB, checkedKB * 100 / totalKB);
             } while (b == ReadSize);
             crc32finish(&crcval);
 #else
+            initprintf(" Checksumming %s...", sidx->name);
             do
             {
                 b = read(fh, buf, ReadSize);
@@ -425,9 +431,9 @@ int32_t ScanGroups(void)
     };
 
 #ifndef EDUKE32
-	for (int i = 0; i < 3; i++)
-	{
-		const char *extension = extensions[i];
+    for (int i = 0; i < 3; i++)
+    {
+        const char *extension = extensions[i];
 #else
     for (char const *extension : extensions)
     {
