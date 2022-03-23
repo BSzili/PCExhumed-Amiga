@@ -828,7 +828,7 @@ void RestartPlayer(short nPlayer)
 	PlayerList[nPlayer].opos.z = sprite[nSprite].z;
 #endif
 #else
-    PlayerList[nPlayer].opos = sprite[nSprite].pos;
+    PlayerList[nPlayer].opos = sprite[nSprite].xyz;
 #endif
     PlayerList[nPlayer].q16oangle = PlayerList[nPlayer].q16angle;
 
@@ -1264,10 +1264,10 @@ static void PlayerPickupKey(int nPlayer, int nKey, int nSprite, int nItem)
 {
     int keyBit = 0x1000 << nKey;
 
-    if (PlayerList[nPlayer].keys != keyBit)
+    if (!(PlayerList[nPlayer].keys & keyBit))
     {
         if (nPlayer == nLocalPlayer) {
-            BuildStatusAnim(36 + 6, 0);
+            BuildStatusAnim(36 + (nKey * 2), 0);
         }
 
         PlayerList[nPlayer].keys |= keyBit;
@@ -1854,7 +1854,7 @@ void FuncPlayer(int a, int nDamage, int nRun)
 	PlayerList[nPlayer].opos.z = sprite[nPlayerSprite].z;
 #endif
 #else
-    PlayerList[nPlayer].opos = sprite[nPlayerSprite].pos;
+    PlayerList[nPlayer].opos = sprite[nPlayerSprite].xyz;
 #endif
     PlayerList[nPlayer].q16oangle = PlayerList[nPlayer].q16angle;
     PlayerList[nPlayer].q16ohoriz = PlayerList[nPlayer].q16horiz;

@@ -104,8 +104,8 @@ enum {
     gamefunc_Show_Console,
 	gamefunc_Mouse_Aiming,
 	gamefunc_Toggle_Crosshair,
-	gamefunc_Next_Weapon,
-	gamefunc_Previous_Weapon,
+    gamefunc_Next_Weapon,
+    gamefunc_Previous_Weapon,
 	gamefunc_AutoRun,
     gamefunc_Map_Follow_Mode,
 	gamefunc_Third_Person_View,
@@ -167,8 +167,10 @@ extern int32_t gShowCrosshair;
 // (currently) mact can't regurgitate them
 extern int32_t MouseFunctions[MAXMOUSEBUTTONS][2];
 extern int32_t MouseDigitalFunctions[MAXMOUSEAXES][2];
+#ifndef EDUKE32
 extern int32_t MouseAnalogueAxes[MAXMOUSEAXES];
 extern int32_t MouseAnalogueScale[MAXMOUSEAXES];
+#endif
 extern int32_t JoystickFunctions[MAXJOYBUTTONSANDHATS][2];
 extern int32_t JoystickDigitalFunctions[MAXJOYAXES][2];
 extern int32_t JoystickAnalogueAxes[MAXJOYAXES];

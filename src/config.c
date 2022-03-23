@@ -374,8 +374,10 @@ int32_t MouseDeadZone, MouseBias;
 // (currently) mact can't regurgitate them
 int32_t MouseFunctions[MAXMOUSEBUTTONS][2];
 int32_t MouseDigitalFunctions[MAXMOUSEAXES][2];
+#ifndef EDUKE32
 int32_t MouseAnalogueAxes[MAXMOUSEAXES];
 int32_t MouseAnalogueScale[MAXMOUSEAXES];
+#endif
 int32_t JoystickFunctions[MAXJOYBUTTONSANDHATS][2];
 int32_t JoystickDigitalFunctions[MAXJOYAXES][2];
 int32_t JoystickAnalogueAxes[MAXJOYAXES];
@@ -533,27 +535,23 @@ static void CONFIG_SetJoystickAnalogAxisScale(int i, int scale)
 static void CONFIG_SetJoystickAnalogAxisInvert(int i, int invert)
 {
     JoystickAnalogueInvert[i] = invert;
-#ifdef EDUKE32
-    CONTROL_SetAnalogAxisInvert(i, invert, controldevice_joystick);
-#endif
+    CONTROL_SetAnalogAxisInvert(i, invert);
 }
 static void CONFIG_SetJoystickAnalogAxisDeadSaturate(int i, int dead, int saturate)
 {
     JoystickAnalogueDead[i] = dead;
     JoystickAnalogueSaturate[i] = saturate;
-#ifdef EDUKE32
-    joySetDeadZone(i, dead, saturate);
-#endif
+    JOYSTICK_SetDeadZone(i, dead, saturate);
 }
 static void CONFIG_SetJoystickDigitalAxisFunction(int i, int j, int function)
 {
     JoystickDigitalFunctions[i][j] = function;
-    CONTROL_MapDigitalAxis(i, function, j, controldevice_joystick);
+    CONTROL_MapDigitalAxis(i, function, j);
 }
 static void CONFIG_SetJoystickAnalogAxisFunction(int i, int function)
 {
     JoystickAnalogueAxes[i] = function;
-    CONTROL_MapAnalogAxis(i, function, controldevice_joystick);
+    CONTROL_MapAnalogAxis(i, function);
 }
 #endif
 
@@ -666,7 +664,7 @@ void CONFIG_SetDefaults()
 
 	SoundToggle = 1;
     MixRate = 44100;
-   FXVolume = 125;
+    FXVolume = 125;
     MusicToggle = 1;
     MusicVolume = 125;
     NumChannels = 2;
@@ -723,16 +721,22 @@ void CONFIG_SetDefaults()
 
     for (int i=0; i<MAXMOUSEAXES; i++)
     {
+#ifndef EDUKE32
         MouseAnalogueScale[i] = DEFAULTMOUSEANALOGUESCALE;
         CONTROL_SetAnalogAxisScale(i, MouseAnalogueScale[i], controldevice_mouse);
-
+#endif
         MouseDigitalFunctions[i][0] = CONFIG_FunctionNameToNum(mousedigitaldefaults[i*2]);
         MouseDigitalFunctions[i][1] = CONFIG_FunctionNameToNum(mousedigitaldefaults[i*2+1]);
+#ifndef EDUKE32
         CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][0], 0, controldevice_mouse);
         CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][1], 1, controldevice_mouse);
 
         MouseAnalogueAxes[i] = CONFIG_AnalogNameToNum(mouseanalogdefaults[i]);
         CONTROL_MapAnalogAxis(i, MouseAnalogueAxes[i], controldevice_mouse);
+#else
+        CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][0], 0);
+        CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][1], 1);
+#endif
     }
 
 #ifndef EDUKE32
@@ -922,9 +926,6 @@ int CONFIG_ReadSetup()
             Bsprintf(g_modDir,"/");
         }
     }
-
-    windowx = -1;
-    windowy = -1;
 #endif
 
 #ifdef RENDERTYPEWIN
@@ -934,10 +935,15 @@ int CONFIG_ReadSetup()
     SCRIPT_GetNumber(scripthandle, "Screen Setup", "ScreenHeight", &gSetup.ydim);
     SCRIPT_GetNumber(scripthandle, "Screen Setup", "ScreenMode", &gSetup.fullscreen);
     SCRIPT_GetNumber(scripthandle, "Screen Setup", "ScreenWidth", &gSetup.xdim);
+
 #ifdef EDUKE32
-    SCRIPT_GetNumber(scripthandle, "Screen Setup", "WindowPosX", &windowx);
-    SCRIPT_GetNumber(scripthandle, "Screen Setup", "WindowPosY", &windowy);
-    SCRIPT_GetNumber(scripthandle, "Screen Setup", "WindowPositioning", &windowpos);
+    vec2_t windowPos;
+    if (!SCRIPT_GetNumber(scripthandle, "Screen Setup", "WindowPosX", &windowPos.x)
+        && !SCRIPT_GetNumber(scripthandle, "Screen Setup", "WindowPosY", &windowPos.y))
+    {
+        g_windowPos = windowPos;
+        g_windowPosValid = true;
+    }
 #endif
 
     SCRIPT_GetNumber(scripthandle, "Screen Setup", "FullScreen", &bFullScreen);
@@ -1057,10 +1063,12 @@ void CONFIG_SetupMouse(void)
     // map over the axes
     for (int i=0; i<MAXMOUSEAXES; i++)
     {
+#ifndef EDUKE32
         Bsprintf(str,"MouseAnalogAxes%d",i);
         temp[0] = 0;
         if (!SCRIPT_GetString(scripthandle, "Controls", str,temp))
             MouseAnalogueAxes[i] = CONFIG_AnalogNameToNum(temp);
+#endif
 
         Bsprintf(str,"MouseDigitalAxes%d_0",i);
         temp[0] = 0;
@@ -1072,10 +1080,12 @@ void CONFIG_SetupMouse(void)
         if (!SCRIPT_GetString(scripthandle, "Controls", str,temp))
             MouseDigitalFunctions[i][1] = CONFIG_FunctionNameToNum(temp);
 
+#ifndef EDUKE32
         Bsprintf(str,"MouseAnalogScale%d",i);
         int32_t scale = MouseAnalogueScale[i];
         SCRIPT_GetNumber(scripthandle, "Controls", str, &scale);
         MouseAnalogueScale[i] = scale;
+#endif
     }
 
     for (int i=0; i<MAXMOUSEBUTTONS; i++)
@@ -1085,10 +1095,15 @@ void CONFIG_SetupMouse(void)
     }
     for (int i=0; i<MAXMOUSEAXES; i++)
     {
+#ifndef EDUKE32
         CONTROL_MapAnalogAxis(i, MouseAnalogueAxes[i], controldevice_mouse);
         CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][0], 0,controldevice_mouse);
         CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][1], 1,controldevice_mouse);
         CONTROL_SetAnalogAxisScale(i, MouseAnalogueScale[i], controldevice_mouse);
+#else
+        CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][0], 0);
+        CONTROL_MapDigitalAxis(i, MouseDigitalFunctions[i][1], 1);
+#endif
     }
 }
 
@@ -1163,12 +1178,18 @@ void CONFIG_SetupJoystick(void)
     }
     for (i=0; i<MAXJOYAXES; i++)
     {
+#ifndef EDUKE32
         CONTROL_MapAnalogAxis(i, JoystickAnalogueAxes[i], controldevice_joystick);
         CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][0], 0, controldevice_joystick);
         CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][1], 1, controldevice_joystick);
+#else
+        CONTROL_MapAnalogAxis(i, JoystickAnalogueAxes[i]);
+        CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][0], 0);
+        CONTROL_MapDigitalAxis(i, JoystickDigitalFunctions[i][1], 1);
+#endif
         CONTROL_SetAnalogAxisScale(i, JoystickAnalogueScale[i], controldevice_joystick);
 #ifdef EDUKE32
-        CONTROL_SetAnalogAxisInvert(i, JoystickAnalogueInvert[i], controldevice_joystick);
+        CONTROL_SetAnalogAxisInvert(i, JoystickAnalogueInvert[i]);
 #endif
     }
 }
@@ -1197,7 +1218,7 @@ void SetupInput()
 	}
 #else
     for (int i=0; i<joystick.numAxes; i++)
-        joySetDeadZone(i,JoystickAnalogueDead[i],JoystickAnalogueSaturate[i]);
+        JOYSTICK_SetDeadZone(i,JoystickAnalogueDead[i],JoystickAnalogueSaturate[i]);
 #endif
 }
 
@@ -1314,9 +1335,12 @@ void CONFIG_WriteSetup(uint32_t flags)
 
 #ifdef EDUKE32
     SCRIPT_PutNumber(scripthandle, "Screen Setup", "MaxRefreshFreq", maxrefreshfreq, FALSE, FALSE);
-    SCRIPT_PutNumber(scripthandle, "Screen Setup", "WindowPosX", windowx, FALSE, FALSE);
-    SCRIPT_PutNumber(scripthandle, "Screen Setup", "WindowPosY", windowy, FALSE, FALSE);
-    SCRIPT_PutNumber(scripthandle, "Screen Setup", "WindowPositioning", windowpos, FALSE, FALSE);
+
+    if (g_windowPosValid)
+    {
+        SCRIPT_PutNumber(scripthandle, "Screen Setup", "WindowPosX", g_windowPos.x, FALSE, FALSE);
+        SCRIPT_PutNumber(scripthandle, "Screen Setup", "WindowPosY", g_windowPos.y, FALSE, FALSE);
+    }
 #endif
 
     SCRIPT_PutNumber(scripthandle, "Screen Setup", "FullScreen", bFullScreen, FALSE, FALSE);
@@ -1349,11 +1373,13 @@ void CONFIG_WriteSetup(uint32_t flags)
 
         for (int i=0; i<MAXMOUSEAXES; i++)
         {
+#ifndef EDUKE32
             if (CONFIG_AnalogNumToName(MouseAnalogueAxes[i]))
             {
                 Bsprintf(buf, "MouseAnalogAxes%d", i);
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_AnalogNumToName(MouseAnalogueAxes[i]));
             }
+#endif
 
             if (CONFIG_FunctionNumToName(MouseDigitalFunctions[i][0]))
             {
@@ -1367,8 +1393,10 @@ void CONFIG_WriteSetup(uint32_t flags)
                 SCRIPT_PutString(scripthandle, "Controls", buf, CONFIG_FunctionNumToName(MouseDigitalFunctions[i][1]));
             }
 
+#ifndef EDUKE32
             Bsprintf(buf, "MouseAnalogScale%d", i);
             SCRIPT_PutNumber(scripthandle, "Controls", buf, MouseAnalogueScale[i], FALSE, FALSE);
+#endif
         }
     }
 

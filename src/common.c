@@ -6,10 +6,11 @@
 #include "build.h"
 #include "baselayer.h"
 #include "palette.h"
-
 #include "grpscan.h"
-
 #include "vfs.h"
+#ifdef EDUKE32
+#include "texcache.h"
+#endif
 
 #ifdef _WIN32
 # include "windows_inc.h"
@@ -91,7 +92,7 @@ void G_ExtInit(void)
 {
     char cwd[BMAX_PATH];
 
-    #if defined EDUKE32_OSX //|| defined __AMIGA__
+    #ifdef EDUKE32_OSX
     char* appdir = Bgetappdir();
     addsearchpath(appdir);
     Xfree(appdir);
@@ -350,7 +351,7 @@ void G_AddSearchPaths(void)
     Exhumed_Add_GOG_Linux(buf);
     Paths_ParseXDGDesktopFilesFromGOG(homepath, "Powerslave_English", Exhumed_Add_GOG_Linux);
 
-    Bfree(homepath);
+    Xfree(homepath);
 
     addsearchpath("/usr/share/games/pcexhumed");
     addsearchpath("/usr/local/share/games/pcexhumed");
@@ -380,9 +381,9 @@ void G_AddSearchPaths(void)
 
     for (i = 0; i < 2; i++)
     {
-        Bfree(applications[i]);
-        Bfree(support[i]);
-        Bfree(documents[i]);
+        Xfree(applications[i]);
+        Xfree(support[i]);
+        Xfree(documents[i]);
     }
 #elif defined (_WIN32)
     char buf[BMAX_PATH] = { 0 };
@@ -590,7 +591,7 @@ int32_t S_OpenAudio(const char* fn, char searchfirst, uint8_t const ismusic)
 
     fp = origfp;
 success:
-    Bfree(testfn);
+    Xfree(testfn);
     if (fp != origfp)
         kclose(origfp);
 

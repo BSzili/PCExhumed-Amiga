@@ -422,9 +422,9 @@ MOVEEND:
             hitscan(x, y, z, pSprite->sectnum, Cos(pSprite->ang), Sin(pSprite->ang), dz, &hitsect, &hitwall, &hitsprite, &x2, &y2, &z2, CLIPMASK1);
 #else
             hitscan(&startPos, pSprite->sectnum, Cos(pSprite->ang), Sin(pSprite->ang), dz, &hitData, CLIPMASK1);
-            x2 = hitData.pos.x;
-            y2 = hitData.pos.y;
-            z2 = hitData.pos.z;
+            x2 = hitData.x;
+            y2 = hitData.y;
+            z2 = hitData.z;
             hitsprite = hitData.sprite;
             hitsect = hitData.sect;
             hitwall = hitData.wall;

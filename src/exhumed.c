@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "exhumed.h"
 #include "osdcmds.h"
 #include "map.h"
+#include "anims.h"
 #include "sequence.h"
 #include "movie.h"
 #include "names.h"
@@ -758,6 +759,8 @@ short scan_char = 0;
 int bVanilla = 0;
 
 char debugBuffer[256];
+char gUserMapFilename[BMAX_PATH];
+bool bUserMap = false;
 
 short wConsoleNode; // TODO - move me into network file
 
@@ -1200,7 +1203,7 @@ void CheckKeys()
 #ifndef EDUKE32
                         setsprite(nSprite, sprite[nSprite].x, sprite[nSprite].y, sprite[nSprite].z);
 #else
-                        setsprite(nSprite, &sprite[nSprite].pos);
+                        setsprite(nSprite, &sprite[nSprite].xyz);
 #endif
                         sprite[nSprite].z = sector[sprite[nSprite].sectnum].floorz;
                     }
@@ -1624,6 +1627,9 @@ void DrawClock()
     DoEnergyTile();
 }
 
+#ifdef EDUKE32
+extern "C" void M32RunScript(const char* s);
+#endif
 void M32RunScript(const char* s) { UNREFERENCED_PARAMETER(s); }
 void app_crashhandler(void)
 {
@@ -1643,17 +1649,12 @@ static inline int32_t calc_smoothratio(ClockTicks totalclk, ClockTicks ototalclk
     // }
     if (bRecord || bPlayback || nFreeze != 0 || bCamera || bPause)
         return 65536;
+
 #ifndef EDUKE32
     //return min(max((totalclock-ototalclock)*(65536L/60),0),65536);
     return min(max((totalclock - ototalclock) * (65536 / 4), 0), 65536);
 #else
-    int32_t rfreq = (refreshfreq != -1 ? refreshfreq : 60);
-    uint64_t elapsedFrames = tabledivide64(((uint64_t) (totalclk - ototalclk).toScale16()) * rfreq, 65536*120);
-#if 0
-    //POGO: additional debug info for testing purposes
-    OSD_Printf("Elapsed frames: %" PRIu64 ", smoothratio: %" PRIu64 "\n", elapsedFrames, tabledivide64(65536*elapsedFrames*30, rfreq));
-#endif
-    return clamp(tabledivide64(65536*elapsedFrames*30, rfreq), 0, 65536);
+    return calc_smoothratio(totalclk, ototalclk, REALGAMETICSPERSEC);
 #endif
 }
 
@@ -2022,6 +2023,14 @@ int app_main(int argc, char const* const* argv)
                     }
                 }
             }
+            else if (Bstrcasecmp(pChar, "map") == 0)
+            {
+                pChar += 4;
+                strcpy(gUserMapFilename, pChar);
+
+                bUserMap = true;
+                doTitle = kFalse;
+            }
             else if (Bstrncasecmp(pChar, "null", 4) == 0)
             {
                 pChar += 4;
@@ -2303,9 +2312,9 @@ int app_main(int argc, char const* const* argv)
 #ifndef EDUKE32
 	OSD_SetParameters(0, 0, 0, 0, 0, 0);
 #else
-    Bsprintf(tempbuf, "Exhumed %s", s_buildRev);
-    OSD_SetVersion(tempbuf, 10,0);
-    OSD_SetParameters(0, 0, 0, 0, 0, 0, OSD_ERROR, OSDTEXT_RED, gamefunctions[gamefunc_Show_Console][0] == '\0' ? OSD_PROTECTED : 0);
+    Bsprintf(buffer, "Exhumed %s", s_buildRev);
+    OSD_SetVersion(buffer, 10,0);
+    OSD_SetParameters(0, 0, 0, 0, 0, 0, OSD_ERROR, OSDTEXT_RED, OSDTEXT_DARKRED, gamefunctions[gamefunc_Show_Console][0] == '\0' ? OSD_PROTECTED : 0);
 #endif
     registerosdcommands();
 
@@ -2409,7 +2418,7 @@ int app_main(int argc, char const* const* argv)
 #endif
 
 #ifdef EDUKE32
-    g_frameDelay = calcFrameDelay(r_maxfps + r_maxfpsoffset);
+    g_frameDelay = calcFrameDelay(r_maxfps);
 #endif
 
     // loc_11745:
@@ -2463,7 +2472,7 @@ int app_main(int argc, char const* const* argv)
         goto STARTGAME1;
     }
     // no forcelevel specified...
-    if (bPlayback)
+    if (bPlayback || bUserMap)
     {
         goto STARTGAME1;
     }
@@ -2989,6 +2998,7 @@ void mydeletesprite(int nSprite)
         bail2dos("bad sprite value %d handed to mydeletesprite", nSprite);
     }
 
+    UnlinkIgnitedAnim(nSprite);
     deletesprite(nSprite);
 
     if (nSprite == besttarget) {
@@ -3488,7 +3498,7 @@ void PrintHelp()
         "-g [file.grp]\tLoad additional game data\n"
         "-h [file.def]\tLoad an alternate definitions file\n"
         "-j [dir]\t\tAdd a directory to " APPNAME "'s search list\n"
-        //"-map [file.map]\tLoad an external map file\n"
+        "-map [file.map]\tLoad an external map file\n"
         "-mh [file.def]\tInclude an additional definitions module\n"
         "-noautoload\tDisable loading from autoload directory\n"
         //"-nodemo\t\tNo Demos\n"

@@ -284,6 +284,8 @@ extern const char *s_buildRev;
 #define FX_Play(ptr, ptrlength, loopstart, loopend, pitchoffset, vol, left, right, priority, volume, callbackval) \
 	FX_PlayLoopedAuto(ptr, ptrlength, loopstart, loopend, pitchoffset, vol, left, right, priority, callbackval)
 
+static inline int FX_SoundValidAndActive(int handle) { return handle > 0 && FX_SoundActive(handle); } 
+
 //#define rotatesprite_(sx, sy, z, a, picnum, dashade, dapalnum, dastat, daalpha, dablend, cx1, cy1, cx2, cy2) rotatesprite((sx), (sy), (z), (a), (picnum), (dashade), (dapalnum), (dastat)&0xFF, (cx1), (cy1), (cx2), (cy2))
 #define rotatesprite_win(sx, sy, z, a, picnum, dashade, dapalnum, dastat) rotatesprite((sx), (sy), (z), (a), (picnum), (dashade), (dapalnum), (dastat), windowx1, windowy1, windowx2, windowy2)
 

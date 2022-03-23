@@ -447,8 +447,8 @@ void viewDo3rdPerson(int nSprite, vec3_t* v, short* nSector, short nAngle, int h
 #else
     hitscan(v, *nSector, nx, ny, nz, &hitinfo, CLIPMASK1);
 
-    hx = hitinfo.pos.x - v->x; 
-    hy = hitinfo.pos.y - v->y;
+    hx = hitinfo.x - v->x; 
+    hy = hitinfo.y - v->y;
 #endif
 
     if (klabs(nx) + klabs(ny) > klabs(hx) + klabs(hy))
