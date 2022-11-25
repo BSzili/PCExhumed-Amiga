@@ -51,7 +51,7 @@ res=o
 
 ifneq (0,$(RELEASE))
   # debugging disabled
-  debug=-fomit-frame-pointer -O2
+  debug=-fomit-frame-pointer -O2 -DNDEBUG
 else
   # debugging enabled
   debug=-ggdb -Og -D_DEBUG #-Werror
