@@ -135,6 +135,31 @@ static Sprite_6 sprite_6[4096];
 #endif
 
 
+#ifndef EDUKE32
+extern int cacnum;
+typedef struct { void **hand; int leng; unsigned char *lock; } cactype;
+extern cactype cac[];
+
+static void caches(void)
+{
+    int i,k,j;
+
+    j = k = 0;
+    for(i=0;i<cacnum;i++)
+    {
+        if ((*cac[i].lock) < 1)
+        {
+            int leng = cac[i].leng;
+            k += leng;
+            if (leng > j)
+                j = leng;
+        }
+    }
+
+    buildprintf("%s free cache %dK largest %dK objects %d\n", __FUNCTION__, k/1024, j/1024, cacnum);
+}
+#endif
+
 bool LoadLevel(int nMap)
 {
     char fileName_1[80];
@@ -439,6 +464,14 @@ bool LoadLevel(int nMap)
     LoadObjects();
 
     levelnum = nMap;
+
+#ifndef EDUKE32
+    //if (bCachePrintMode)
+    {
+        //cachedebug = 1;
+        caches();
+    }
+#endif
 
     return true;
 }

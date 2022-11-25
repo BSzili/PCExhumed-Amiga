@@ -390,7 +390,7 @@ int32_t JoystickAnalogueSaturate[MAXJOYAXES];
 uint8_t KeyboardKeys[kMaxGameFunctions][2];
 
 #ifndef EDUKE32
-int32_t MAXCACHE1DSIZE = (18*1024*1024);
+int32_t MAXCACHE1DSIZE = (16*1024*1024);
 #else
 int32_t MAXCACHE1DSIZE = (96*1024*1024);
 #endif
