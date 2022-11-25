@@ -136,6 +136,7 @@ static Sprite_6 sprite_6[4096];
 
 
 #ifndef EDUKE32
+extern char cachedebug;
 extern int cacnum;
 typedef struct { void **hand; int leng; unsigned char *lock; } cactype;
 extern cactype cac[];
@@ -466,9 +467,10 @@ bool LoadLevel(int nMap)
     levelnum = nMap;
 
 #ifndef EDUKE32
-    //if (bCachePrintMode)
+    char bCachePrintMode = cachedebug;
+    if (bCachePrintMode)
     {
-        //cachedebug = 1;
+        cachedebug = 1;
         caches();
     }
 #endif
