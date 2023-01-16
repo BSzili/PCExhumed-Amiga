@@ -94,8 +94,10 @@ void gltexinvalidate (long dapicnum, long dapalnum, long dameth);
 
 
 #define ClockTicks long
-#define timerInit inittimer
-#define timerSetCallback installusertimercallback
+//#define timerInit inittimer
+//#define timerSetCallback installusertimercallback
+#define timerInit(tickspersecond) { int tps = (tickspersecond);
+#define timerSetCallback(callback) inittimer(tps, (callback)); }
 #define timerGetTicks getticks
 #define timerGetPerformanceCounter getusecticks
 #define timerGetPerformanceFrequency gettimerfreq
@@ -290,5 +292,11 @@ static inline int FX_SoundValidAndActive(int handle) { return handle > 0 && FX_S
 #define rotatesprite_win(sx, sy, z, a, picnum, dashade, dapalnum, dastat) rotatesprite((sx), (sy), (z), (a), (picnum), (dashade), (dapalnum), (dastat), windowx1, windowy1, windowx2, windowy2)
 
 #define wrand rand
+
+#ifdef __GNUC__
+# define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#else
+# define UNUSED(x) x
+#endif
 
 #endif
