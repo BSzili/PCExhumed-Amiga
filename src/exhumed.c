@@ -1948,12 +1948,12 @@ int app_main(int argc, char const* const* argv)
                      NULL,
                      NULL,
                      GAME_clearbackground,
-                     BGetTime,
 #ifndef EDUKE32
-                     NULL);
+                     NULL,
 #else
-                     GAME_onshowosd);
+                     BGetTime,
 #endif
+                     GAME_onshowosd);
 
     wm_setapptitle(APPNAME);
 
@@ -2310,7 +2310,7 @@ int app_main(int argc, char const* const* argv)
     initprintf("Initializing OSD...\n");
 
 #ifndef EDUKE32
-	OSD_SetParameters(0, 0, 0, 0, 0, 0);
+	//OSD_SetParameters(0, 0, 0, 0, 0, 0);
 #else
     Bsprintf(buffer, "Exhumed %s", s_buildRev);
     OSD_SetVersion(buffer, 10,0);
